@@ -23,7 +23,9 @@ function Navbar() {
               </a>
             </li>
           </ul>
-          <img src="/assets/github.png" alt="github logo" />
+          <a href="https://github.com/RaviGupta965" className="cursor-pointer">
+            <img src="/assets/github.png" alt="github logo" />
+          </a>
         </div>
       </div>
     </div>

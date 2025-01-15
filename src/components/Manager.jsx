@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-
+import { ToastContainer, toast } from "react-toastify";
 import { useRef } from "react";
-
+import { v4 as uuidv4 } from "uuid";
 function Manager() {
-  const [form, setform] = useState({ site: "", username: "", password: "" });
+  const [form, setform] = useState({ site: "", username: "", password: ""});
   const [passarray, setpassarray] = useState([]);
   const ref = useRef();
   const pass = useRef();
@@ -25,17 +25,46 @@ function Manager() {
     }
   };
 
+  const copytext = (text) => {
+    navigator.clipboard.writeText(text);
+    toast("Copied to Clipboard!", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+    });
+  };
   const savepassword = () => {
-    setpassarray([...passarray, form]);
-    localStorage.setItem("passwords", JSON.stringify([...passarray, form]));
-    console.log(passarray);
+    setpassarray([...passarray, {...form,id:uuidv4()}]);
+    localStorage.setItem("passwords", JSON.stringify([...passarray,{...form,id:uuidv4()}]));;
   };
 
   const handlechange = (e) => {
     setform({ ...form, [e.target.name]: e.target.value });
   };
+
+  const deletepassword = (id) => {
+    
+  };
+
   return (
-    <div>
+    <div className="min-h-[90vh] overflow-auto">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]">
         <div className="absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_500px_at_50%_200px,#C9EBFF,transparent)]"></div>
       </div>
@@ -100,7 +129,7 @@ function Manager() {
                 src="https://cdn.lordicon.com/jgnvfzqg.json"
                 trigger="hover"
               ></lord-icon>
-              Add Password
+              Save Password
             </button>
           </div>
 
@@ -114,21 +143,59 @@ function Manager() {
                     <th className="py-2">Website</th>
                     <th className="py-2">Username</th>
                     <th className="py-2">Password</th>
+                    <th className="py-2">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-[#b8e6f4] ">
-                  {passarray.map((item)=>{
-                    return <tr>
-                    <td className="text-center py-2 border-2">
-                      <a href={item.site} >{item.site}</a>
-                    </td>
-                    <td className="text-center py-2 border-2">
-                    {item.username}
-                    </td>
-                    <td className="text-center py-2 border-2">{item.password}</td>
-                  </tr>
+                <tbody className="bg-[#b8e6f4]">
+                  {passarray.map((item) => {
+                    return (
+                      <tr>
+                        <td className="text-center py-2 border-2">
+                          <div className="flex flex-row py-2 justify-center gap-2">
+                            <a href={item.site}>{item.site}</a>
+                            <img
+                              onClick={() => copytext(item.site)}
+                              className="cursor-pointer"
+                              src="/assets/copy.svg"
+                              alt="copy btn"
+                            />
+                          </div>
+                        </td>
+                        <td className="text-center py-2 border-2">
+                          <div className="flex flex-row py-2 justify-center gap-2">
+                            {item.username}
+                            <img
+                              onClick={() => copytext(item.username)}
+                              className="cursor-pointer"
+                              src="/assets/copy.svg"
+                              alt="copy btn"
+                            />
+                          </div>
+                        </td>
+                        <td className="text-center py-2 border-2">
+                          <div className="flex flex-row py-2 justify-center gap-2">
+                            {item.password}
+                            <img
+                              onClick={() => copytext(item.password)}
+                              className="cursor-pointer"
+                              src="/assets/copy.svg"
+                              alt="copy btn"
+                            />
+                          </div>
+                        </td>
+
+                        <td className="flex justify-center items-center text-center py-2 border-2 gap-3">
+                          <lord-icon onClick={()=>deletepassword(item.id)} 
+                            src="https://cdn.lordicon.com/skkahier.json"
+                            trigger="hover"
+                            style={{"width":"25px","height":"25px"}}
+                          ></lord-icon>
+
+                          <img onClick={()=>editpassword(item.id)} src="/assets/edit.svg" height={25} width={25} alt="" />
+                        </td>
+                      </tr>
+                    );
                   })}
-                  
                 </tbody>
               </table>
             )}
