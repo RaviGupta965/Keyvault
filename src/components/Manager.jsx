@@ -3,7 +3,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 function Manager() {
-  const [form, setform] = useState({ site: "", username: "", password: ""});
+  const [form, setform] = useState({ site: "", username: "", password: "" });
   const [passarray, setpassarray] = useState([]);
   const ref = useRef();
   const pass = useRef();
@@ -29,18 +29,46 @@ function Manager() {
     navigator.clipboard.writeText(text);
     toast("Copied to Clipboard!", {
       position: "top-right",
-      autoClose: 5000,
+      autoClose: 3000,
       hideProgressBar: false,
       closeOnClick: false,
-      pauseOnHover: true,
+      pauseOnHover: false,
       draggable: true,
       progress: undefined,
-      theme: "light",
+      theme: "dark",
     });
   };
   const savepassword = () => {
-    setpassarray([...passarray, {...form,id:uuidv4()}]);
-    localStorage.setItem("passwords", JSON.stringify([...passarray,{...form,id:uuidv4()}]));;
+    if(form.site.length>3 && form.username.length>3 && form.password.length){
+      setpassarray([...passarray, { ...form, id: uuidv4() }]);
+      localStorage.setItem(
+        "passwords",
+        JSON.stringify([...passarray, { ...form, id: uuidv4() }])
+      );
+      toast("Password saved!!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      setform({ site: "", username: "", password: "" });
+    }
+    else{
+      toast("All fields required!!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+    }
   };
 
   const handlechange = (e) => {
@@ -48,7 +76,31 @@ function Manager() {
   };
 
   const deletepassword = (id) => {
-    
+
+    let c=confirm("Do you want to delete this password");
+    if(c){
+      setpassarray(passarray.filter((item) => item.id !== id));
+      localStorage.setItem(
+        "passwords",
+        JSON.stringify(passarray.filter((item) => item.id !== id))
+      );
+      toast("Password Deleted!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+    }
+  };
+
+  const editpassword = (id) => {
+    const edting_data = passarray.filter((item) => item.id === id)[0];
+    setpassarray(passarray.filter((item) => item.id !== id));
+    setform(edting_data);
   };
 
   return (
@@ -69,7 +121,7 @@ function Manager() {
         <div className="absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_500px_at_50%_200px,#C9EBFF,transparent)]"></div>
       </div>
 
-      <div className="mycontainer w-3/4">
+      <div className="p-0 md:p-0 md:mycontainer md:px-40 md:py-5 ">
         <h1 className="text-4xl font-bold text-center">
           <span className="text-[#62b3cc]">&lt;</span>
           Key
@@ -88,7 +140,7 @@ function Manager() {
             id=""
             onChange={handlechange}
           />
-          <div className="flex gap-2 py-4">
+          <div className="flex md:flex-row flex-col gap-2 py-4">
             <input
               value={form.username}
               className="rounded-md border-2 border-green-300 w-3/5 text-black px-4 py-1 w-full"
@@ -98,7 +150,7 @@ function Manager() {
               id=""
               onChange={handlechange}
             />
-            <div className="relative w-2/5 ">
+            <div className="relative md:w-2/5">
               <input
                 value={form.password}
                 ref={pass}
@@ -112,7 +164,7 @@ function Manager() {
               <span className="absolute text-black right-1 py-1 cursor-pointer">
                 <img
                   ref={ref}
-                  width={27}
+                  width={25}
                   src="/assets/open.png"
                   alt=""
                   onClick={showpassword}
@@ -184,14 +236,23 @@ function Manager() {
                           </div>
                         </td>
 
-                        <td className="flex justify-center items-center text-center py-2 border-2 gap-3">
-                          <lord-icon onClick={()=>deletepassword(item.id)} 
-                            src="https://cdn.lordicon.com/skkahier.json"
-                            trigger="hover"
-                            style={{"width":"25px","height":"25px"}}
-                          ></lord-icon>
+                        <td className=" text-center py-2 border-2 ">
+                          <div className="flex justify-center items-center gap-3">
+                            <lord-icon
+                              onClick={() => deletepassword(item.id)}
+                              src="https://cdn.lordicon.com/skkahier.json"
+                              trigger="hover"
+                              style={{ width: "25px", height: "25px" }}
+                            ></lord-icon>
 
-                          <img onClick={()=>editpassword(item.id)} src="/assets/edit.svg" height={25} width={25} alt="" />
+                            <img
+                              onClick={() => editpassword(item.id)}
+                              src="/assets/edit.svg"
+                              height={25}
+                              width={25}
+                              alt=""
+                            />
+                          </div>
                         </td>
                       </tr>
                     );

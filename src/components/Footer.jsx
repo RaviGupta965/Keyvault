@@ -9,7 +9,7 @@ function Footer() {
           Key
           <span className="text-[#62b3cc]">Vault/&gt;</span>
         </h1>
-        <div>
+        <div className="overflow-hidden md:overflow-visible">
           Created with <img className="inline-block" src="/assets/heart.svg"></img>&nbsp;by Ravi
         </div>
         <div>2025 &copy;</div>
