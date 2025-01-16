@@ -8,12 +8,15 @@ function Manager() {
   const ref = useRef();
   const pass = useRef();
 
+  const getpasswords = async () => {
+    let req = await fetch("http://localhost:3000/");
+    let passwords = await req.json();
+    setpassarray(passwords);
+  };
+
   useEffect(() => {
-    let passwords = localStorage.getItem("passwords");
-    if (passwords) {
-      setpassarray(JSON.parse(passwords));
-    }
-  }, []);
+    getpasswords();
+  }, [passarray]);
 
   const showpassword = () => {
     if (ref.current.src.includes("/assets/open.png")) {
@@ -38,13 +41,18 @@ function Manager() {
       theme: "dark",
     });
   };
-  const savepassword = () => {
-    if(form.site.length>3 && form.username.length>3 && form.password.length){
-      setpassarray([...passarray, { ...form, id: uuidv4() }]);
-      localStorage.setItem(
-        "passwords",
-        JSON.stringify([...passarray, { ...form, id: uuidv4() }])
-      );
+  const savepassword = async () => {
+    if (
+      form.site.length > 3 &&
+      form.username.length > 3 &&
+      form.password.length
+    ) {
+      let res = await fetch("http://localhost:3000/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({...form,_id:uuidv4()})
+      });
+      await getpasswords();
       toast("Password saved!!", {
         position: "top-right",
         autoClose: 3000,
@@ -56,8 +64,7 @@ function Manager() {
         theme: "dark",
       });
       setform({ site: "", username: "", password: "" });
-    }
-    else{
+    } else {
       toast("All fields required!!", {
         position: "top-right",
         autoClose: 3000,
@@ -75,15 +82,15 @@ function Manager() {
     setform({ ...form, [e.target.name]: e.target.value });
   };
 
-  const deletepassword = (id) => {
-
-    let c=confirm("Do you want to delete this password");
-    if(c){
-      setpassarray(passarray.filter((item) => item.id !== id));
-      localStorage.setItem(
-        "passwords",
-        JSON.stringify(passarray.filter((item) => item.id !== id))
-      );
+  const deletepassword = async(id) => {
+    let c = confirm("Do you want to delete this password");
+    if (c) {
+      let res = await fetch("http://localhost:3000/", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({id})
+      });
+      await getpasswords()
       toast("Password Deleted!", {
         position: "top-right",
         autoClose: 3000,
@@ -97,10 +104,14 @@ function Manager() {
     }
   };
 
-  const editpassword = (id) => {
-    const edting_data = passarray.filter((item) => item.id === id)[0];
-    setpassarray(passarray.filter((item) => item.id !== id));
-    setform(edting_data);
+  const editpassword = async(id) => {
+    let res = await fetch("http://localhost:3000/", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({id})
+    });
+    const data=await res.json();
+    setform({site:data.site,username:data.username,password:data.password})
   };
 
   return (
@@ -137,7 +148,7 @@ function Manager() {
             type="text"
             placeholder="Enter website name"
             name="site"
-            id=""
+            id="site"
             onChange={handlechange}
           />
           <div className="flex md:flex-row flex-col gap-2 py-4">
@@ -147,7 +158,7 @@ function Manager() {
               type="text"
               name="username"
               placeholder="Enter username"
-              id=""
+              id="username"
               onChange={handlechange}
             />
             <div className="relative md:w-2/5">
@@ -158,7 +169,7 @@ function Manager() {
                 type="password"
                 name="password"
                 placeholder="Password"
-                id=""
+                id="password"
                 onChange={handlechange}
               />
               <span className="absolute text-black right-1 py-1 cursor-pointer">
@@ -239,14 +250,15 @@ function Manager() {
                         <td className=" text-center py-2 border-2 ">
                           <div className="flex justify-center items-center gap-3">
                             <lord-icon
-                              onClick={() => deletepassword(item.id)}
+                              onClick={() => deletepassword(item._id)}
                               src="https://cdn.lordicon.com/skkahier.json"
                               trigger="hover"
-                              style={{ width: "25px", height: "25px" }}
+                              style={{ width: "25px", height: "25px",cursor:"pointer" }}
                             ></lord-icon>
 
                             <img
-                              onClick={() => editpassword(item.id)}
+                            className="cursor-pointer"
+                              onClick={() => editpassword(item._id)}
                               src="/assets/edit.svg"
                               height={25}
                               width={25}
